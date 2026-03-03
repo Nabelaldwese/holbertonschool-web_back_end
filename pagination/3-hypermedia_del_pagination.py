@@ -11,12 +11,12 @@ class Server:
     """Server class to paginate a database of popular baby names."""
     DATA_FILE = "Popular_Baby_Names.csv"
 
-    def __init__(self) -> None:
-        self.__dataset: Optional[List[List]] = None
-        self.__indexed_dataset: Optional[Dict[int, List]] = None
+    def __init__(self):
+        self.__dataset = None
+        self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
-        """Return the cached dataset loaded from the CSV file."""
+        """Return the cached dataset loaded from the CSV file without headers."""
         if self.__dataset is None:
             with open(self.DATA_FILE) as f:
                 reader = csv.reader(f)
@@ -25,21 +25,16 @@ class Server:
         return self.__dataset
 
     def indexed_dataset(self) -> Dict[int, List]:
-        """Return a dict indexed by original position, starting at 0."""
+        """Dataset indexed by sorting position, starting at 0."""
         if self.__indexed_dataset is None:
             dataset = self.dataset()
-            truncated_dataset = dataset[:1000]
-            self.__indexed_dataset = {
-                i: truncated_dataset[i] for i in range(len(truncated_dataset))
-            }
+            self.__indexed_dataset = {i: dataset[i] for i in range(len(dataset))}
         return self.__indexed_dataset
 
     def get_hyper_index(
         self, index: Optional[int] = None, page_size: int = 10
     ) -> Dict:
-        """
-        Return deletion-resilient pagination details starting at a given index.
-        """
+        """Return deletion-resilient pagination details starting at a given index."""
         if index is None:
             index = 0
 
@@ -60,6 +55,6 @@ class Server:
         return {
             "index": index,
             "next_index": current,
-            "page_size": page_size,
+            "page_size": len(data),
             "data": data,
         }
